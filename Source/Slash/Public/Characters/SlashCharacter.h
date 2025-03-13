@@ -12,6 +12,7 @@ class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+class UGroomComponent;
 
 
 UCLASS()
@@ -41,6 +42,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* RightMouseButtonAction;
 
+	UPROPERTY(EditAnywhere, Category = Hair)
+	UGroomComponent* Hair;
+
+	UPROPERTY(EditAnywhere, Category = Hair)
+	UGroomComponent* Eyebrows;
+
 	UPROPERTY(EditAnywhere)
 	float RotatinSpeed;
 
@@ -48,7 +55,6 @@ protected:
 	void MoveByCamera(const FInputActionValue& Value);
 	void FullMove(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	//void ToggleMovementMode();
 	void OnRightMouseButtonPressed(const FInputActionValue& Value);
 	void OnRightMouseButtonReleased(const FInputActionValue& Value);
 
