@@ -95,11 +95,6 @@ void ASlashCharacter::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisValue.Y);
 }
 
-//void ASlashCharacter::ToggleMovementMode()
-//{
-//	bIsCameraRelativeMovement = !bIsCameraRelativeMovement;
-//}
-
 void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
 {
 	bIsRightMouseButtonPressed = true;
@@ -121,9 +116,10 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		//EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASlashCharacter::MoveByCharacter);
+
 		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASlashCharacter::FullMove);
 		EnhancedInputComponent->BindAction(LookingAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		
 		// Podpiêcie akcji prawego przycisku myszy
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, this, &ASlashCharacter::OnRightMouseButtonPressed);

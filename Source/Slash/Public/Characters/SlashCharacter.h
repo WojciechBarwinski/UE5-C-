@@ -40,6 +40,9 @@ protected:
 	UInputAction* LookingAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* RightMouseButtonAction;
 
 	UPROPERTY(EditAnywhere, Category = Hair)
