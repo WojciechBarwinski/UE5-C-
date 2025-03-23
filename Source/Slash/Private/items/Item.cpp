@@ -3,22 +3,29 @@
 
 #include "items/Item.h"
 #include "Slash/DebugMacros.h"
+#include "Components/SphereComponent.h"
 
 
 // Sets default values
 AItem::AItem()
 {
- 	
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	RootComponent = ItemMesh;
+
+	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
+	Sphere->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
+	Sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
 }
 
 float AItem::TransformedSin()
@@ -41,8 +48,32 @@ void AItem::Tick(float DeltaTime)
 	//float DeltaZ = Amplitude * FMath::Sin(RunningTime * TimeConstant);
 
 	//AddActorWorldOffset(FVector(0.f, 0.f, DeltaZ));
-	DRAW_SPHERE_SingleFrame(GetActorLocation());
-	DRAW_VECTOR_SingleFrame(GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 100.f);
+	/*DRAW_SPHERE_SingleFrame(GetActorLocation());
+	DRAW_VECTOR_SingleFrame(GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 100.f);*/
+}
+
+void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+	const FString Message = OtherActor->GetName() + TEXT(" wszed³ w sphere");
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, Message);
+	}
+}
+
+void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	//const FString OtherActorName = OtherActor->GetName();
+	const FString Message = OtherActor->GetName() + TEXT(" wyszed³ z sphere");
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, Message);
+	}
 }
 
 //// Movement rate in units of cm/s
