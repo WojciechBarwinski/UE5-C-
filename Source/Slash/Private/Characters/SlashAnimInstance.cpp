@@ -22,6 +22,13 @@ void USlashAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
+    //SlashCharacter = Cast<ASlashCharacter>(TryGetPawnOwner());
+    if (SlashCharacter && bHasSword != SlashCharacter->hasSword)
+    {
+        bHasSword = SlashCharacter->hasSword;
+        // Mo¿esz nawet wywo³aæ rêczne odœwie¿enie blendów
+    }
+
     if (SlashCharacterMovement)
     {
         GroundSpeed = UKismetMathLibrary::VSizeXY(SlashCharacterMovement->Velocity);

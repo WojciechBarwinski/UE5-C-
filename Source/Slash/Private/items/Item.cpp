@@ -4,6 +4,7 @@
 #include "items/Item.h"
 #include "Slash/DebugMacros.h"
 #include "Components/SphereComponent.h"
+#include "Characters/SlashCharacter.h"
 
 
 // Sets default values
@@ -59,20 +60,19 @@ void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	const FString Message = OtherActor->GetName() + TEXT(" wszed³ w sphere");
-	if (GEngine)
+	ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(OtherActor);
+	if (SlashCharacter)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, Message);
+		SlashCharacter->SetOverlappingItem(this);
 	}
 }
 
 void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	//const FString OtherActorName = OtherActor->GetName();
-	const FString Message = OtherActor->GetName() + TEXT(" wyszed³ z sphere");
-	if (GEngine)
+	ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(OtherActor);
+	if (SlashCharacter)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, Message);
+		SlashCharacter->SetOverlappingItem(nullptr);
 	}
 }
 

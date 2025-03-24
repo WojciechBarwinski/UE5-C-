@@ -13,6 +13,7 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
+class AItem;
 
 
 UCLASS()
@@ -26,6 +27,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool hasSword;
 protected:
 
 	virtual void BeginPlay() override;
@@ -43,6 +46,9 @@ protected:
 	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* InteractionAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* RightMouseButtonAction;
 
 	UPROPERTY(EditAnywhere, Category = Hair)
@@ -58,6 +64,7 @@ protected:
 	void MoveByCamera(const FInputActionValue& Value);
 	void FullMove(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Interaction(const FInputActionValue& Value);
 	void OnRightMouseButtonPressed(const FInputActionValue& Value);
 	void OnRightMouseButtonReleased(const FInputActionValue& Value);
 
@@ -68,5 +75,14 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 
+	UPROPERTY(VisibleInstanceOnly)
+	AItem* OverlappingItem;
+
 	bool bIsRightMouseButtonPressed;
+
+public:
+	FORCEINLINE void SetOverlappingItem(AItem* Item)
+	{
+		OverlappingItem = Item;
+	}
 };

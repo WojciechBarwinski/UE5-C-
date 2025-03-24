@@ -20,6 +20,9 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool bHasSword = false;
+
+	UPROPERTY(BlueprintReadOnly)
 	ASlashCharacter* SlashCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)

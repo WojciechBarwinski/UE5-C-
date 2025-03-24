@@ -39,15 +39,15 @@ protected:
 	UFUNCTION(BlueprintPure)
 	float TransformedCos();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* ItemMesh;
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"),
 		meta = (Tooltip = "Description od RunnigTime variable")
 	)
 	float RunningTime;
-
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ItemMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere;

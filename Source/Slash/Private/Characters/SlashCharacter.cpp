@@ -8,6 +8,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
+#include "Items/Item.h"
+#include "Items/Weapons/Weapon.h"
 
 ASlashCharacter::ASlashCharacter()
 {
@@ -33,6 +35,8 @@ ASlashCharacter::ASlashCharacter()
 	Eyebrows = CreateDefaultSubobject<UGroomComponent>(TEXT("Eyebrows"));
 	Eyebrows->SetupAttachment(GetMesh());
 	Eyebrows->AttachmentName = FString("head");
+
+	hasSword = false;
 
 }
 
@@ -95,6 +99,16 @@ void ASlashCharacter::Look(const FInputActionValue& Value)
 	AddControllerPitchInput(LookAxisValue.Y);
 }
 
+void ASlashCharacter::Interaction(const FInputActionValue& Value)
+{
+	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
+		hasSword = true;
+	}
+}
+
 void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
 {
 	bIsRightMouseButtonPressed = true;
@@ -120,6 +134,7 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASlashCharacter::FullMove);
 		EnhancedInputComponent->BindAction(LookingAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(InteractionAction, ETriggerEvent::Started, this, &ASlashCharacter::Interaction);
 		
 		// Podpiêcie akcji prawego przycisku myszy
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, this, &ASlashCharacter::OnRightMouseButtonPressed);
