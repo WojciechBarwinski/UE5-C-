@@ -9,7 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
 #include "Items/Item.h"
-//#include "Interfaces/Attachable.h"
+#include "Characters/CharacterTypes.h"
 #include "Items/Weapons/Weapon.h"
 
 ASlashCharacter::ASlashCharacter()
@@ -110,7 +110,8 @@ void ASlashCharacter::Interaction(const FInputActionValue& Value)
 		if (Actor->Implements<UAttachable>())
 		{
 			IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket"));
-			hasSword = true;
+			//hasSword = true;
+			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 			break;
 		}
 	}
