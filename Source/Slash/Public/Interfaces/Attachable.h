@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Characters/CharacterTypes.h"
 #include "Attachable.generated.h"
 
 // This class does not need to be modified.
@@ -23,5 +24,8 @@ class SLASH_API IAttachable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attachment")
-	void Attach(USceneComponent* InParent, FName InSocketName);
+	void Attach(USceneComponent* InParent);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Attachment")
+	ECharacterState GetCharacterState() const; // Nowa metoda
 };

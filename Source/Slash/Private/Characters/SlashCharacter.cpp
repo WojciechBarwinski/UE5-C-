@@ -109,9 +109,9 @@ void ASlashCharacter::Interaction(const FInputActionValue& Value)
 	{
 		if (Actor->Implements<UAttachable>())
 		{
-			IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket"));
-			//hasSword = true;
-			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+			//IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket"));
+			IAttachable::Execute_Attach(Actor, GetMesh());
+			CharacterState = IAttachable::Execute_GetCharacterState(Actor);
 			break;
 		}
 	}
