@@ -102,7 +102,7 @@ void ASlashCharacter::Look(const FInputActionValue& Value)
 
 void ASlashCharacter::Interaction(const FInputActionValue& Value)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("wykrywa F z brancha"));
 	TArray<AActor*> OverlappingActors;
 	GetOverlappingActors(OverlappingActors);
 
