@@ -75,14 +75,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 
-	UPROPERTY(VisibleInstanceOnly)
-	AItem* OverlappingItem;
-
 	bool bIsRightMouseButtonPressed;
 
-public:
-	FORCEINLINE void SetOverlappingItem(AItem* Item)
-	{
-		OverlappingItem = Item;
-	}
 };

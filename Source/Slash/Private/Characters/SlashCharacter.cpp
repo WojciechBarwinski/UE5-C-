@@ -102,7 +102,6 @@ void ASlashCharacter::Look(const FInputActionValue& Value)
 
 void ASlashCharacter::Interaction(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("wykrywa F z brancha"));
 	TArray<AActor*> OverlappingActors;
 	GetOverlappingActors(OverlappingActors);
 
@@ -110,18 +109,11 @@ void ASlashCharacter::Interaction(const FInputActionValue& Value)
 	{
 		if (Actor->Implements<UAttachable>())
 		{
-			IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket")); // "WeaponSocket" to nazwa gniazda w skeletal meshu postaci
-			break; // Przerywa po znalezieniu pierwszego attachable
+			IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket"));
+			hasSword = true;
+			break;
 		}
 	}
-
-
-	/*AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	if (OverlappingWeapon)
-	{
-		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
-		hasSword = true;
-	}*/
 }
 
 void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)

@@ -16,7 +16,6 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent, FName InSocketNam
 {
     if (InParent && ItemMesh)
     {
-        UE_LOG(LogTemp, Warning, TEXT("metoda intefacu"));
         FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
         ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
     }
