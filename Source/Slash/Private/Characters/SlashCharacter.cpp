@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
 #include "Items/Item.h"
+//#include "Interfaces/Attachable.h"
 #include "Items/Weapons/Weapon.h"
 
 ASlashCharacter::ASlashCharacter()
@@ -101,12 +102,26 @@ void ASlashCharacter::Look(const FInputActionValue& Value)
 
 void ASlashCharacter::Interaction(const FInputActionValue& Value)
 {
-	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+
+	TArray<AActor*> OverlappingActors;
+	GetOverlappingActors(OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (Actor->Implements<UAttachable>())
+		{
+			IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket")); // "WeaponSocket" to nazwa gniazda w skeletal meshu postaci
+			break; // Przerywa po znalezieniu pierwszego attachable
+		}
+	}
+
+
+	/*AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
 		hasSword = true;
-	}
+	}*/
 }
 
 void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
