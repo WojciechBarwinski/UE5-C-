@@ -5,6 +5,7 @@
 #include <InputActionValue.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CharacterTypes.h"
 #include "SlashCharacter.generated.h"
 
 
@@ -29,6 +30,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool hasSword;
+
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -77,4 +80,8 @@ private:
 
 	bool bIsRightMouseButtonPressed;
 
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+public:
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };
