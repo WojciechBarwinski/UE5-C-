@@ -10,6 +10,7 @@
 #include "GroomComponent.h"
 #include "Items/Item.h"
 #include "Characters/CharacterTypes.h"
+#include "Animation/AnimMontage.h"
 #include "Items/Weapons/Weapon.h"
 
 ASlashCharacter::ASlashCharacter()
@@ -92,6 +93,21 @@ void ASlashCharacter::FullMove(const FInputActionValue& Value)
 	}
 }
 
+void ASlashCharacter::Attack(const FInputActionValue& Value)
+{
+	if (CanAttack())
+	{
+		PlayAttackMontage();
+		ActionState = EActionState::EAS_Attacking;
+	}
+}
+
+bool ASlashCharacter::CanAttack()
+{
+	return ActionState == EActionState::EAS_Unoccupied &&
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
+
 void ASlashCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisValue = Value.Get<FVector2D>();
@@ -109,7 +125,6 @@ void ASlashCharacter::Interaction(const FInputActionValue& Value)
 	{
 		if (Actor->Implements<UAttachable>())
 		{
-			//IAttachable::Execute_Attach(Actor, GetMesh(), FName("RightHandSocket"));
 			IAttachable::Execute_Attach(Actor, GetMesh());
 			CharacterState = IAttachable::Execute_GetCharacterState(Actor);
 			break;
@@ -125,6 +140,40 @@ void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
 void ASlashCharacter::OnRightMouseButtonReleased(const FInputActionValue& Value)
 {
 	bIsRightMouseButtonPressed = false;
+}
+
+void ASlashCharacter::PlayAttackMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage) {
+
+		AnimInstance->Montage_Play(AttackMontage);
+		const int32 Selection = FMath::RandRange(0, 2);
+		FName SectionName = FName();
+
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+		case 2:
+			SectionName = FName("Attack3");
+			break;
+		default:
+			break;
+		}
+
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+	}
+
+}
+
+void ASlashCharacter::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
 }
 
 void ASlashCharacter::Tick(float DeltaTime)
@@ -143,6 +192,7 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(LookingAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(InteractionAction, ETriggerEvent::Started, this, &ASlashCharacter::Interaction);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ASlashCharacter::Attack);
 		
 		// Podpiêcie akcji prawego przycisku myszy
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, this, &ASlashCharacter::OnRightMouseButtonPressed);
