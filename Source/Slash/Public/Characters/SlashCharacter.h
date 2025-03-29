@@ -8,15 +8,15 @@
 #include "CharacterTypes.h"
 #include "SlashCharacter.generated.h"
 
-
 class UInputMappingContext;
 class UInputAction;
+class UCharacterMovementHandler;
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
 class AItem;
 class UAnimMontage;
-
+class AWeapon;
 
 UCLASS()
 class SLASH_API ASlashCharacter : public ACharacter
@@ -29,13 +29,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite)
-	bool hasSword;
-
-	
 protected:
 
 	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	UCharacterMovementHandler* MovementHandler;
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* SlashMappingContext;
@@ -64,21 +63,20 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Hair)
 	UGroomComponent* Eyebrows;
 
-	UPROPERTY(EditAnywhere)
-	float RotatinSpeed;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float CharacterRotationSpeed = 10.f;
 
-	void MoveByCharacter(const FInputActionValue& Value);
-	void MoveByCamera(const FInputActionValue& Value);
-	void FullMove(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float MovementSpeedMultiplier = 1.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	bool HasWeapon; 
+
 	void Attack(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
 	void Interaction(const FInputActionValue& Value);
-	void OnRightMouseButtonPressed(const FInputActionValue& Value);
-	void OnRightMouseButtonReleased(const FInputActionValue& Value);
+	void StoreOrDrawWeapon();
 
-	/**
-	* Play montage functions
-	*/
+	void PlayEquipMontage(FName SectionName);
 	void PlayAttackMontage();
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -91,20 +89,20 @@ private:
 
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
-
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
-
-	/** animation montage 
-	*
-	*/
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* EquipMontage;
+
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
 	bool CanAttack();
+	bool CanDisarm();
+	bool CanArm();
 
 public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }

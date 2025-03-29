@@ -12,6 +12,7 @@
 #include "Characters/CharacterTypes.h"
 #include "Animation/AnimMontage.h"
 #include "Items/Weapons/Weapon.h"
+#include "Characters/CharacterMovementHandler.h"
 
 ASlashCharacter::ASlashCharacter()
 {
@@ -22,6 +23,8 @@ ASlashCharacter::ASlashCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	MovementHandler = CreateDefaultSubobject<UCharacterMovementHandler>(TEXT("MovementHandler"));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
@@ -38,8 +41,7 @@ ASlashCharacter::ASlashCharacter()
 	Eyebrows->SetupAttachment(GetMesh());
 	Eyebrows->AttachmentName = FString("head");
 
-	hasSword = false;
-
+	HasWeapon = false;
 }
 
 void ASlashCharacter::BeginPlay()
@@ -52,44 +54,10 @@ void ASlashCharacter::BeginPlay()
 			subsystem->AddMappingContext(SlashMappingContext, 0);
 		}
 	}
-}
 
-void ASlashCharacter::MoveByCharacter(const FInputActionValue& Value)
-{
-	const FVector2D MoveValue = Value.Get<FVector2D>();
-
-	FVector Forward = GetActorForwardVector();
-	FVector Right = GetActorRightVector();
-
-	AddMovementInput(Forward, MoveValue.Y);
-	FRotator RotationDelta(0.f, MoveValue.X * RotatinSpeed, 0.f);
-	AddActorLocalRotation(RotationDelta);
-}
-
-void ASlashCharacter::MoveByCamera(const FInputActionValue& Value)
-{
-	const FVector2D MoveVector = Value.Get<FVector2D>();
-
-	const FRotator Rotation = Controller->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(ForwardDirection, MoveVector.Y);
-	AddMovementInput(RightDirection, MoveVector.X);
-	
-}
-
-void ASlashCharacter::FullMove(const FInputActionValue& Value)
-{
-	if (bIsRightMouseButtonPressed)
+	if (MovementHandler)
 	{
-		MoveByCamera(Value);
-	}
-	else
-	{
-		MoveByCharacter(Value);
+		MovementHandler->SetRotationSpeed(CharacterRotationSpeed);
 	}
 }
 
@@ -108,12 +76,16 @@ bool ASlashCharacter::CanAttack()
 		CharacterState != ECharacterState::ECS_Unequipped;
 }
 
-void ASlashCharacter::Look(const FInputActionValue& Value)
+bool ASlashCharacter::CanDisarm()
 {
-	const FVector2D LookAxisValue = Value.Get<FVector2D>();
+	return ActionState == EActionState::EAS_Unoccupied && 
+		CharacterState != ECharacterState::ECS_Unequipped;
+}
 
-	AddControllerYawInput(LookAxisValue.X);
-	AddControllerPitchInput(LookAxisValue.Y);
+bool ASlashCharacter::CanArm()
+{
+	return //ActionState == EActionState::EAS_Unoccupied && 
+		CharacterState == ECharacterState::ECS_Unequipped;
 }
 
 void ASlashCharacter::Interaction(const FInputActionValue& Value)
@@ -121,25 +93,47 @@ void ASlashCharacter::Interaction(const FInputActionValue& Value)
 	TArray<AActor*> OverlappingActors;
 	GetOverlappingActors(OverlappingActors);
 
-	for (AActor* Actor : OverlappingActors)
+	if (HasWeapon)
 	{
-		if (Actor->Implements<UAttachable>())
+		StoreOrDrawWeapon();
+		return;
+	}
+
+	if (!OverlappingActors.IsEmpty() && !HasWeapon)
+	{
+		for (AActor* Actor : OverlappingActors)
 		{
+			if (Actor->Implements<UAttachable>())
+			{
+				FString Name = Actor->GetActorNameOrLabel();
+				UE_LOG(LogTemp, Warning, TEXT("Dodanie stanu: %s"), *Name);
 			IAttachable::Execute_Attach(Actor, GetMesh());
 			CharacterState = IAttachable::Execute_GetCharacterState(Actor);
+			HasWeapon = true;
 			break;
+			}
 		}
 	}
 }
 
-void ASlashCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
+void ASlashCharacter::StoreOrDrawWeapon()
 {
-	bIsRightMouseButtonPressed = true;
+	if (CanDisarm()) {
+		PlayEquipMontage(FName("Unequip"));
+		CharacterState = ECharacterState::ECS_Unequipped;
+	} else if (CanArm()) {
+		PlayEquipMontage(FName("Equip"));
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	}
 }
 
-void ASlashCharacter::OnRightMouseButtonReleased(const FInputActionValue& Value)
+void ASlashCharacter::PlayEquipMontage(FName SectionName)
 {
-	bIsRightMouseButtonPressed = false;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && EquipMontage) {
+		AnimInstance->Montage_Play(EquipMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
+	}
 }
 
 void ASlashCharacter::PlayAttackMontage()
@@ -165,10 +159,8 @@ void ASlashCharacter::PlayAttackMontage()
 		default:
 			break;
 		}
-
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
-
 }
 
 void ASlashCharacter::AttackEnd()
@@ -187,18 +179,14 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-
-		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASlashCharacter::FullMove);
-		EnhancedInputComponent->BindAction(LookingAction, ETriggerEvent::Triggered, this, &ASlashCharacter::Look);
+		EnhancedInputComponent->BindAction(LookingAction, ETriggerEvent::Triggered, MovementHandler, &UCharacterMovementHandler::Look);
+		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, MovementHandler, &UCharacterMovementHandler::FullMove);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(InteractionAction, ETriggerEvent::Started, this, &ASlashCharacter::Interaction);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ASlashCharacter::Attack);
 		
-		// Podpiêcie akcji prawego przycisku myszy
-		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, this, &ASlashCharacter::OnRightMouseButtonPressed);
-		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Completed, this, &ASlashCharacter::OnRightMouseButtonReleased);
-
-		
+		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, MovementHandler, &UCharacterMovementHandler::OnRightMouseButtonPressed);
+		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Completed, MovementHandler, &UCharacterMovementHandler::OnRightMouseButtonReleased);
 	}
 }
 

@@ -19,6 +19,7 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         FName SocketName = GetSocketNameBasedOnState();
         FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
         ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
+        ItemState = EItemState::EIS_Equipped;
     }
 }
 
