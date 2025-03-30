@@ -14,18 +14,29 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 
 void AWeapon::Attach_Implementation(USceneComponent* InParent)
 {
+
+    ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(InParent->GetOwner());
+    
     if (InParent && ItemMesh)
     {
         FName SocketName = GetSocketNameBasedOnState();
         FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
         ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
         ItemState = EItemState::EIS_Equipped;
+		//SlashCharacter->SetEquippedWeapon(this);
     }
 }
 
 ECharacterState AWeapon::GetCharacterState_Implementation() const
 {
     return WeaponType;
+}
+
+void AWeapon::SheathedWeapon_Implementation(USceneComponent* InParent)
+{
+    FName SocketName = "SpineSocket";
+    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+    ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
 }
 
 void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

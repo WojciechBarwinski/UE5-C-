@@ -6,6 +6,7 @@
 #include "CharacterInteractionHandler.generated.h"
 
 class ASlashCharacter;
+class AWeapon;
 struct FInputActionValue;
 
 UCLASS()
@@ -17,6 +18,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* EquipMontage;
+
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void PutWeaponOnBack();
 
 	void Interaction(const FInputActionValue& Value);
 	void DrawOrSheathedWeapon();

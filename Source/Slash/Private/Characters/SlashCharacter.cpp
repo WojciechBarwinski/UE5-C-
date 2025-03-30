@@ -7,8 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "GroomComponent.h"
 #include "Characters/CharacterTypes.h"
-#include "Characters/CharacterMovementHandler.h"
 #include "Characters/Handlers/CharacterInteractionHandler.h"
+#include "Characters/Handlers/CharacterMovementHandler.h"
 #include "Characters/Handlers/CharacterAttackHandler.h"
 
 ASlashCharacter::ASlashCharacter()

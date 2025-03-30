@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/Attachable.h"
 #include "Characters/SlashCharacter.h"
+#include "items/Weapons/Weapon.h"
 
 void UCharacterInteractionHandler::BeginPlay()
 {
@@ -12,6 +13,11 @@ void UCharacterInteractionHandler::BeginPlay()
 	checkf(OwnerCharacter.IsValid(), TEXT("OwnerCharacter is invalid!"));
 	SlashCharacter = Cast<ASlashCharacter>(OwnerCharacter.Get());
 	checkf(SlashCharacter.IsValid(), TEXT("SlashCharacter is invalid!"));
+}
+
+void UCharacterInteractionHandler::PutWeaponOnBack()
+{
+			IAttachable::Execute_SheathedWeapon(SlashCharacter->GetEquippedWeapon(), SlashCharacter->GetMesh());
 }
 
 //public functions
@@ -28,8 +34,14 @@ void UCharacterInteractionHandler::Interaction(const FInputActionValue& Value)
 			{
 				IAttachable::Execute_Attach(Actor, OwnerCharacter->GetMesh());
 				//tmp without mechanic for 1h/2h weapon CharacterState = IAttachable::Execute_GetCharacterState(Actor);
-				SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
-				break;
+				/*SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
+				break;*/
+
+				if (AWeapon* Weapon = Cast<AWeapon>(Actor))
+				{
+					SlashCharacter->SetEquippedWeapon(Weapon);
+					SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
+				}
 			}
 		}
 	}

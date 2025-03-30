@@ -23,6 +23,7 @@ public:
 	void Equip(USceneComponent* InParent, FName InSocketName);
 	virtual void Attach_Implementation(USceneComponent* InParent) override;
 	virtual ECharacterState GetCharacterState_Implementation() const override;
+	virtual void SheathedWeapon_Implementation(USceneComponent* InParent) override;
 
 protected:
 

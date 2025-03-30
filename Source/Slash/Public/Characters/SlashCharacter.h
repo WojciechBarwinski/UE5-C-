@@ -14,6 +14,7 @@ class UCharacterAttackHandler;
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
+class AWeapon;
 
 UCLASS()
 class SLASH_API ASlashCharacter : public ACharacter
@@ -79,6 +80,9 @@ private:
 	ECharacterArmedState CharacterArmedState = ECharacterArmedState::Unarmed;
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
+	UPROPERTY()
+	AWeapon* EquippedWeapon;
+
 public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 
@@ -87,4 +91,7 @@ public:
 
 	FORCEINLINE EActionState GetActionState() const { return ActionState; }
 	void SetActionState(EActionState NewState) { ActionState = NewState; }
+
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	void SetEquippedWeapon(AWeapon* NewWeapon) { EquippedWeapon = NewWeapon; }
 };
