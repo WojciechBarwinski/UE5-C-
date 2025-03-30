@@ -1,22 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
-#include <InputActionValue.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "CharacterTypes.h"
 #include "SlashCharacter.generated.h"
 
+// Forward declarations
 class UInputMappingContext;
 class UInputAction;
 class UCharacterMovementHandler;
+class UCharacterInteractionHandler;
+class UCharacterAttackHandler;
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
-class AItem;
-class UAnimMontage;
-class AWeapon;
 
 UCLASS()
 class SLASH_API ASlashCharacter : public ACharacter
@@ -24,17 +21,22 @@ class SLASH_API ASlashCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-
 	ASlashCharacter();
-	virtual void Tick(float DeltaTime) override;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 
 	virtual void BeginPlay() override;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCharacterInteractionHandler* InteractionHandler;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCharacterMovementHandler* MovementHandler;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCharacterAttackHandler* AttackHandler;
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* SlashMappingContext;
@@ -52,6 +54,9 @@ protected:
 	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
+	UInputAction* ToggleWeaponAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* InteractionAction;
 
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -63,21 +68,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Hair)
 	UGroomComponent* Eyebrows;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float CharacterRotationSpeed = 10.f;
-
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MovementSpeedMultiplier = 1.0f;
-
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	bool HasWeapon; 
-
-	void Attack(const FInputActionValue& Value);
-	void Interaction(const FInputActionValue& Value);
-	void StoreOrDrawWeapon();
-
-	void PlayEquipMontage(FName SectionName);
-	void PlayAttackMontage();
 private:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* CameraBoom;
@@ -85,25 +75,16 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 
-	bool bIsRightMouseButtonPressed;
-
-	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
-
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState ActionState = EActionState::EAS_Unoccupied;
-
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* AttackMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* EquipMontage;
-
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
-	bool CanAttack();
-	bool CanDisarm();
-	bool CanArm();
+	ECharacterArmedState CharacterArmedState = ECharacterArmedState::Unarmed;
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
 public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+
+	FORCEINLINE ECharacterArmedState GetArmedState() const { return CharacterArmedState; }
+	void SetArmedState(ECharacterArmedState NewState) { CharacterArmedState = NewState; }
+
+	FORCEINLINE EActionState GetActionState() const { return ActionState; }
+	void SetActionState(EActionState NewState) { ActionState = NewState; }
 };

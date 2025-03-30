@@ -6,22 +6,23 @@
 void UCharacterMovementHandler::BeginPlay()
 {
     Super::BeginPlay();
-
     OwnerCharacter = Cast<ACharacter>(GetOwner());
+
+    checkf(OwnerCharacter.IsValid(), TEXT("OwnerCharacter is invalid!"));
+	CharacterRotationSpeed = 5.f;
 }
 
 //public functions
 void UCharacterMovementHandler::Look(const FInputActionValue& Value)
 {
-    if (OwnerCharacter.IsValid() && OwnerCharacter->GetController())
-    {
+    if (!CheckController()) return;
+
         const FVector2D LookAxisValue = Value.Get<FVector2D>();
         OwnerCharacter->AddControllerYawInput(LookAxisValue.X);
         OwnerCharacter->AddControllerPitchInput(LookAxisValue.Y);
-    }
 }
 
-void UCharacterMovementHandler::FullMove(const FInputActionValue& Value)
+void UCharacterMovementHandler::HandlerMove(const FInputActionValue& Value)
 {
     if (!CheckController()) return;
 
