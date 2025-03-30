@@ -15,9 +15,14 @@ void UCharacterInteractionHandler::BeginPlay()
 	checkf(SlashCharacter.IsValid(), TEXT("SlashCharacter is invalid!"));
 }
 
-void UCharacterInteractionHandler::PutWeaponOnBack()
+void UCharacterInteractionHandler::SheathedWeapon()
 {
-			IAttachable::Execute_SheathedWeapon(SlashCharacter->GetEquippedWeapon(), SlashCharacter->GetMesh());
+	IAttachable::Execute_SheathedWeapon(SlashCharacter->GetEquippedWeapon(), SlashCharacter->GetMesh());
+}
+
+void UCharacterInteractionHandler::DrawWeapon()
+{
+	IAttachable::Execute_DrawWeapon(SlashCharacter->GetEquippedWeapon(), SlashCharacter->GetMesh());
 }
 
 //public functions
@@ -33,9 +38,6 @@ void UCharacterInteractionHandler::Interaction(const FInputActionValue& Value)
 			if (Actor->Implements<UAttachable>())
 			{
 				IAttachable::Execute_Attach(Actor, OwnerCharacter->GetMesh());
-				//tmp without mechanic for 1h/2h weapon CharacterState = IAttachable::Execute_GetCharacterState(Actor);
-				/*SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
-				break;*/
 
 				if (AWeapon* Weapon = Cast<AWeapon>(Actor))
 				{

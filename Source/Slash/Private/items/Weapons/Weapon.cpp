@@ -6,11 +6,11 @@
 
 
 
-void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
-{
-    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
-    ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
-}
+//void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
+//{
+//    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+//    ItemMesh->AttachToComponent(InParent, TransformRules, InSocketName);
+//}
 
 void AWeapon::Attach_Implementation(USceneComponent* InParent)
 {
@@ -23,7 +23,6 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
         ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
         ItemState = EItemState::EIS_Equipped;
-		//SlashCharacter->SetEquippedWeapon(this);
     }
 }
 
@@ -35,6 +34,13 @@ ECharacterState AWeapon::GetCharacterState_Implementation() const
 void AWeapon::SheathedWeapon_Implementation(USceneComponent* InParent)
 {
     FName SocketName = "SpineSocket";
+    FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
+    ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
+}
+
+void AWeapon::DrawWeapon_Implementation(USceneComponent* InParent)
+{
+    FName SocketName = GetSocketNameBasedOnState();
     FAttachmentTransformRules TransformRules(EAttachmentRule::SnapToTarget, true);
     ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
 }

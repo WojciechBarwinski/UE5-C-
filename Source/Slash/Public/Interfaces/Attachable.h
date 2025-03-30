@@ -24,4 +24,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attachment")
 	void SheathedWeapon(USceneComponent* InParent);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attachment")
+	void DrawWeapon(USceneComponent* InParent);
 };

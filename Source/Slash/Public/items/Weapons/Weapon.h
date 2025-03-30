@@ -20,10 +20,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties")
 	ECharacterState WeaponType;
 
-	void Equip(USceneComponent* InParent, FName InSocketName);
+	//void Equip(USceneComponent* InParent, FName InSocketName);
 	virtual void Attach_Implementation(USceneComponent* InParent) override;
 	virtual ECharacterState GetCharacterState_Implementation() const override;
 	virtual void SheathedWeapon_Implementation(USceneComponent* InParent) override;
+	virtual void DrawWeapon_Implementation(USceneComponent* InParent) override;
 
 protected:
 

@@ -20,7 +20,10 @@ public:
 	UAnimMontage* EquipMontage;
 
 	UFUNCTION(BlueprintCallable, Category = "Attack")
-	void PutWeaponOnBack();
+	void SheathedWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void DrawWeapon();
 
 	void Interaction(const FInputActionValue& Value);
 	void DrawOrSheathedWeapon();
