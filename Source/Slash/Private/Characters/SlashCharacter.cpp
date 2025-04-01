@@ -10,6 +10,9 @@
 #include "Characters/Handlers/CharacterInteractionHandler.h"
 #include "Characters/Handlers/CharacterMovementHandler.h"
 #include "Characters/Handlers/CharacterAttackHandler.h"
+#include "items/Weapons/Weapon.h"
+#include "Components/BoxComponent.h"
+
 
 ASlashCharacter::ASlashCharacter()
 {
@@ -51,6 +54,14 @@ void ASlashCharacter::BeginPlay()
 	}
 }
 
+void ASlashCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+	}
+}
+
 void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -69,4 +80,6 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Completed, MovementHandler, &UCharacterMovementHandler::OnRightMouseButtonReleased);
 	}
 }
+
+
 
