@@ -44,6 +44,8 @@ void UCharacterInteractionHandler::Interaction(const FInputActionValue& Value)
 					SlashCharacter->SetEquippedWeapon(Weapon);
 					SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
 				}
+
+				break;
 			}
 		}
 	}
