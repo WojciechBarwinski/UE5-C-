@@ -66,7 +66,7 @@ void UCharacterInteractionHandler::DrawOrSheathedWeapon()
 }
 
 //private functions
-void UCharacterInteractionHandler::PlayDrawOrSheathedWeaponMontage(FName SectionName)
+void UCharacterInteractionHandler::PlayDrawOrSheathedWeaponMontage(const FName SectionName)
 {
 	UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
 	if (AnimInstance && EquipMontage) {

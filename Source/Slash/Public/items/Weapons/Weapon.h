@@ -28,6 +28,7 @@ public:
 	virtual void SheathedWeapon_Implementation(USceneComponent* InParent) override;
 	virtual void DrawWeapon_Implementation(USceneComponent* InParent) override;
 
+	void ClearIgnoredActors() { IgnoredActors.Empty(); }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +55,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BoxTraceEnd;
 
+	TSet<TWeakObjectPtr<AActor>> IgnoredActors;
 public:
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; }
 };

@@ -35,5 +35,5 @@ private:
 
 	TWeakObjectPtr<ACharacter> OwnerCharacter;
 	TWeakObjectPtr<ASlashCharacter> SlashCharacter;
-	void PlayDrawOrSheathedWeaponMontage(FName SectionName);
+	void PlayDrawOrSheathedWeaponMontage(const FName SectionName);
 };
