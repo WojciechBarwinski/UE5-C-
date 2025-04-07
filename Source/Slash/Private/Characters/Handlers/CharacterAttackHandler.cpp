@@ -35,7 +35,7 @@ void UCharacterAttackHandler::PlayAttackMontage()
 	if (AnimInstance && AttackMontage) {
 
 		AnimInstance->Montage_Play(AttackMontage);
-		const int32 Selection = FMath::RandRange(0, 2);
+		const int32 Selection = FMath::RandRange(0, 1);
 		FName SectionName = FName();
 
 		switch (Selection)

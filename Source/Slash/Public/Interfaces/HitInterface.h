@@ -15,5 +15,6 @@ class SLASH_API IHitInterface
 	GENERATED_BODY()
 
 public:
-	virtual void GetHit(const FVector& ImpactPoint) = 0;
+	UFUNCTION(BlueprintNativeEvent)
+	void GetHit(const FVector& ImpactPoint);
 };

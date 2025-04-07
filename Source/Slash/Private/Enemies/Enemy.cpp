@@ -1,6 +1,6 @@
+#include "Enemies/Enemy.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Enemies/Enemy.h"
 #include "Slash/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -38,7 +38,7 @@ void AEnemy::Tick(float DeltaTime)
 
 }
 
-void AEnemy::GetHit(const FVector& ImpactPoint)
+void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
 
     const FVector Forward = GetActorForwardVector();
