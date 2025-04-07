@@ -5,6 +5,7 @@
 #include "Characters/SlashCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/HitInterface.h"
 
@@ -45,6 +46,7 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         ItemMesh->AttachToComponent(InParent, TransformRules, SocketName);
         ItemState = EItemState::EIS_Equipped;
         PlayEquipSound();
+        Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 }
 
@@ -79,9 +81,10 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (!OtherActor || OtherActor == this || IgnoredActors.Contains(OtherActor))
+    if (!OtherActor || OtherActor == this || IgnoredActors.Contains(OtherActor)) {
         return;
-   
+    }
+
     const FVector Start = BoxTraceStart->GetComponentLocation();
     const FVector End = BoxTraceEnd->GetComponentLocation();
 
@@ -109,9 +112,8 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
         {
             HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
             IgnoredActors.Add(BoxHit.GetActor());
-           
+            CreateFields(BoxHit.ImpactPoint);
         }
- CreateFields(BoxHit.ImpactPoint);
     }
 }
 

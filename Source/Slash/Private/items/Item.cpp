@@ -39,7 +39,6 @@ float AItem::TransformedCos()
 	return Amplitude * FMath::Cos(RunningTime * TimeConstant);
 }
 
-// Called every frame
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -63,26 +62,9 @@ void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	/*ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(OtherActor);
-	if (SlashCharacter)
-	{
-		SlashCharacter->SetOverlappingItem(this);
-	}*/
 }
 
 void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	/*ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(OtherActor);
-	if (SlashCharacter)
-	{
-		SlashCharacter->SetOverlappingItem(nullptr);
-	}*/
+	
 }
-
-//// Movement rate in units of cm/s
-//float MovementRate = 50.f;
-//float RotationRate = 45.f;
-//
-//// MovementRate * DeltaTime (cm/s) * (s/frame) = (cm/frame)
-//AddActorWorldOffset(FVector(MovementRate* DeltaTime, 0.f, 0.f));
-//AddActorWorldRotation(FRotator(0.f, RotationRate* DeltaTime, 0.f));
