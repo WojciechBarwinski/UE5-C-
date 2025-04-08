@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Interfaces/HitInterface.h"
+#include "NiagaraComponent.h"
 
 
 
@@ -47,6 +48,11 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         ItemState = EItemState::EIS_Equipped;
         PlayEquipSound();
         Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+        if (EmbersEffect)
+        {
+            EmbersEffect->Deactivate();
+        }
     }
 }
 

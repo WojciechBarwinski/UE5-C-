@@ -1,13 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "items/Item.h"
 #include "Slash/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Characters/SlashCharacter.h"
+#include "NiagaraComponent.h"
 
 
-// Sets default values
 AItem::AItem()
 {
 
@@ -18,9 +15,11 @@ AItem::AItem()
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(GetRootComponent());
+
+	EmbersEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Embers"));
+	EmbersEffect->SetupAttachment(GetRootComponent());
 }
 
-// Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
