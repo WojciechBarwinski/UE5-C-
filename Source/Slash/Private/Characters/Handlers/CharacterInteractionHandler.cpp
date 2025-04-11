@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Interfaces/Attachable.h"
 #include "Characters/SlashCharacter.h"
+#include "Test/Openable.h"
 #include "items/Weapons/Weapon.h"
 
 void UCharacterInteractionHandler::BeginPlay()
@@ -28,6 +29,7 @@ void UCharacterInteractionHandler::DrawWeapon()
 //public functions
 void UCharacterInteractionHandler::Interaction(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Interaction pressed!"));
 	TArray<AActor*> OverlappingActors;
 	OwnerCharacter->GetOverlappingActors(OverlappingActors);
 
@@ -45,6 +47,12 @@ void UCharacterInteractionHandler::Interaction(const FInputActionValue& Value)
 					SlashCharacter->SetArmedState(ECharacterArmedState::WeaponDrawn);
 				}
 
+				//break;
+			}
+			else if (Actor->Implements<UOpenable>())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Openable actor found!"));
+				IOpenable::Execute_Open(Actor, OwnerCharacter->GetMesh());
 				break;
 			}
 		}
@@ -74,4 +82,8 @@ void UCharacterInteractionHandler::PlayDrawOrSheathedWeaponMontage(const FName S
 		AnimInstance->Montage_JumpToSection(SectionName, EquipMontage);
 	}
 }
+
+//void UCharacterInteractionHandler::Open()
+//{
+//}
 

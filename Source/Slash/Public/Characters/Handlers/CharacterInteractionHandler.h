@@ -25,7 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void DrawWeapon();
 
+	UFUNCTION(BlueprintCallable)
 	void Interaction(const FInputActionValue& Value);
+
 	void DrawOrSheathedWeapon();
 	
 protected:
@@ -36,4 +38,6 @@ private:
 	TWeakObjectPtr<ACharacter> OwnerCharacter;
 	TWeakObjectPtr<ASlashCharacter> SlashCharacter;
 	void PlayDrawOrSheathedWeaponMontage(const FName SectionName);
+
+	//void Open();
 };

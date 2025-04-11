@@ -40,6 +40,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void CreateFields(const FVector& FieldLocation);
 
+	
 private:
 	FName GetSocketNameBasedOnState() const;
 	void PlayEquipSound() const;
@@ -57,6 +58,9 @@ private:
 	USceneComponent* BoxTraceEnd;
 
 	TSet<TWeakObjectPtr<AActor>> IgnoredActors;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	float Damage = 20.f;
 public:
 	FORCEINLINE UBoxComponent* GetWeaponBox() const { return WeaponBox; }
 };

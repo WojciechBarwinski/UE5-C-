@@ -29,7 +29,7 @@ void AEnemy::BeginPlay()
 	
     if (HealthBarWidget)
     {
-        HealthBarWidget->SetHealthPercent(1.f);
+        HealthBarWidget->SetVisibility(false);
     }
 }
 
@@ -43,14 +43,58 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName)
 	}
 }
 
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    if (Attributes && HealthBarWidget)
+    {
+        Attributes->ReceiveDamage(DamageAmount);
+        HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
+    }
+    CombatTarget = EventInstigator->GetPawn();
+    return DamageAmount;
+}
+
+void AEnemy::Die()
+{
+    if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+    {
+        if (DeathMontage)
+        {
+            AnimInstance->Montage_Play(DeathMontage);
+            const int32 RandomSectionIndex = FMath::RandRange(0, DeathMontage->CompositeSections.Num() - 1);
+            AnimInstance->Montage_JumpToSection(DeathMontage->GetSectionName(RandomSectionIndex), DeathMontage);
+        }
+    }
+
+    if (HealthBarWidget)
+    {
+        HealthBarWidget->SetVisibility(false);
+    }
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SetLifeSpan(3.f);
+}
+
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    if (CombatTarget)
+    {
+        const double DistanceToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).Size();
+        if (DistanceToTarget > CombatRadius)
+        {
+            CombatTarget = nullptr;
+            if (HealthBarWidget)
+            {
+                HealthBarWidget->SetVisibility(false);
+            }
+        }
+    }
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
+    
 
     const FVector Forward = GetActorForwardVector();
     // Lower Impact Point to the Enemy's Actor Location Z
@@ -86,17 +130,20 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
     {
         Section = FName("FromRight");
     }
-    /*UE_LOG(LogTemp, Warning, TEXT("Sekcja: %s"), *Section.ToString());*/
-    PlayHitReactMontage(Section);
-
-    /*UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + CrossProduct * 100.f, 5.f, FColor::Blue, 5.f);
-
-    if (GEngine)
+    
+    if (HealthBarWidget)
     {
-        GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("Theta: %f"), Theta));
+        HealthBarWidget->SetVisibility(true);
     }
-    UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60.f, 5.f, FColor::Red, 5.f);
-    UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + ToHit * 60.f, 5.f, FColor::Green, 5.f);*/
+
+    if (Attributes && Attributes->IsAlive())
+    {
+        PlayHitReactMontage(Section);
+    }
+    else
+    {
+        Die();
+    }
 
     if (HitSound)
     {

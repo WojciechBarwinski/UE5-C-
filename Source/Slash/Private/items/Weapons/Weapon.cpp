@@ -48,7 +48,8 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         ItemState = EItemState::EIS_Equipped;
         PlayEquipSound();
         Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+        SetOwner(SlashCharacter);
+        SetInstigator(SlashCharacter);
         if (EmbersEffect)
         {
             EmbersEffect->Deactivate();
@@ -113,12 +114,21 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
     if (BoxHit.GetActor())
     {
+        UGameplayStatics::ApplyDamage(
+                BoxHit.GetActor(),
+                Damage,
+                GetInstigator()->GetController(),
+                this,
+                UDamageType::StaticClass());
+
         IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor());
         if (HitInterface)
         {
             HitInterface->Execute_GetHit(BoxHit.GetActor(), BoxHit.ImpactPoint);
             IgnoredActors.Add(BoxHit.GetActor());
             CreateFields(BoxHit.ImpactPoint);
+
+            
         }
     }
 }
