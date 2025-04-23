@@ -6,7 +6,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AttributeComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Items/Weapons/Weapon.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Navigation/PathFollowingComponent.h"
+#include "AIController.h"
+#include "Perception/PawnSensingComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -18,9 +23,35 @@ AEnemy::AEnemy()
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-    Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+    
     HealthBarWidget = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HealthBar"));
     HealthBarWidget->SetupAttachment(GetRootComponent());
+
+    GetCharacterMovement()->bOrientRotationToMovement = true;
+    bUseControllerRotationPitch = false;
+    bUseControllerRotationYaw = false;
+    bUseControllerRotationRoll = false;
+
+    PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
+    PawnSensing->SightRadius = 4000.f;
+    PawnSensing->SetPeripheralVisionAngle(45.f);
+}
+
+void AEnemy::PawnSeen(APawn* SeenPawn)
+{
+    if (EnemyState == EEnemyState::EES_Attacking || EnemyState == EEnemyState::EES_Chasing) return;
+    if (SeenPawn->ActorHasTag(FName("SlashCharacter")))
+    {
+        EnemyState = EEnemyState::EES_Chasing;
+        GetWorldTimerManager().ClearTimer(PatrolTimer);
+        GetCharacterMovement()->MaxWalkSpeed = 300.f;
+        CombatTarget = SeenPawn;
+        if (EnemyState != EEnemyState::EES_Attacking)
+        {
+            EnemyState = EEnemyState::EES_Chasing;
+            MoveToTarget(CombatTarget);
+        }
+    }
 }
 
 void AEnemy::BeginPlay()
@@ -31,17 +62,32 @@ void AEnemy::BeginPlay()
     {
         HealthBarWidget->SetVisibility(false);
     }
+
+    EnemyController = Cast<AAIController>(GetController());
+
+    if (PatrolTargets.Num() > 0)
+    {
+        CurrentPatrolTarget = PatrolTargets[0];
+        LastPatrolTarget = CurrentPatrolTarget;
+		CurrentTarget = CurrentPatrolTarget;
+		MoveToTarget(CurrentPatrolTarget);
+    }
+
+    if (PawnSensing)
+    {
+        PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy::PawnSeen);
+    }
+
+    UWorld* World = GetWorld();
+    if (World && WeaponClass)
+    {
+        AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+        DefaultWeapon->Execute_Attach(DefaultWeapon, this->GetMesh());
+        EquippedWeapon = DefaultWeapon;
+    }
+
 }
 
-void AEnemy::PlayHitReactMontage(const FName& SectionName)
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
-	{
-		AnimInstance->Montage_Play(HitReactMontage);
-		AnimInstance->Montage_JumpToSection(SectionName, HitReactMontage);
-	}
-}
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -51,6 +97,9 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
         HealthBarWidget->SetHealthPercent(Attributes->GetHealthPercent());
     }
     CombatTarget = EventInstigator->GetPawn();
+    EnemyState = EEnemyState::EES_Chasing;
+    GetCharacterMovement()->MaxWalkSpeed = 300.f;
+    MoveToTarget(CombatTarget);
     return DamageAmount;
 }
 
@@ -76,26 +125,101 @@ void AEnemy::Die()
 
 void AEnemy::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
-    if (CombatTarget)
+    if (EnemyState > EEnemyState::EES_Patrolling)
     {
-        const double DistanceToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).Size();
-        if (DistanceToTarget > CombatRadius)
-        {
-            CombatTarget = nullptr;
-            if (HealthBarWidget)
-            {
-                HealthBarWidget->SetVisibility(false);
-            }
-        }
+        CheckCombatTarget();
     }
+    else
+    {
+        CheckPatrolTarget();
+    }
+}
+
+bool AEnemy::InTargetRange(AActor* Target, double Radius)
+{
+    if (Target == nullptr) return false;
+    const double DistanceToTarget = (Target->GetActorLocation() - GetActorLocation()).Size();
+    return DistanceToTarget <= Radius;
+}
+
+void AEnemy::CheckPatrolTarget()
+{
+    if (InTargetRange(CurrentPatrolTarget, PatrolRadius)) {
+    CurrentTarget = ChoosePatrolTarget();
+    GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolTimerFinished, 5.f);
+    }
+}
+
+void AEnemy::CheckCombatTarget()
+{
+    if (!InTargetRange(CombatTarget, CombatRadius))
+    {
+        // Outside combat radius, lose interest
+        CombatTarget = nullptr;
+        if (HealthBarWidget)
+        {
+            HealthBarWidget->SetVisibility(false);
+        }
+        EnemyState = EEnemyState::EES_Patrolling;
+        GetCharacterMovement()->MaxWalkSpeed = 125.f;
+        MoveToTarget(LastPatrolTarget);
+    }
+
+    else if (!InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Chasing)
+    {
+        // Outside attack range, chase character
+        EnemyState = EEnemyState::EES_Chasing;
+        GetCharacterMovement()->MaxWalkSpeed = 300.f;
+        MoveToTarget(CombatTarget);
+    }
+
+    else if (InTargetRange(CombatTarget, AttackRadius) && EnemyState != EEnemyState::EES_Attacking)
+    {
+        // Inside attack range, attack character
+        EnemyState = EEnemyState::EES_Attacking;
+        // TODO: Attack montage
+    }
+}
+
+void AEnemy::Destroyed()
+{
+    if (EquippedWeapon)
+    {
+        EquippedWeapon->Destroy();
+    }
+}
+
+AActor* AEnemy::ChoosePatrolTarget()
+{
+        CurrentPatrolIndex = (CurrentPatrolIndex + 1) % PatrolTargets.Num();
+        CurrentPatrolTarget = PatrolTargets[CurrentPatrolIndex];
+
+        if (CurrentPatrolTarget != LastPatrolTarget)
+        {
+            LastPatrolTarget = CurrentPatrolTarget;
+            return CurrentPatrolTarget;
+        }
+    return nullptr;
+}
+
+void AEnemy::PatrolTimerFinished()
+{
+	MoveToTarget(CurrentTarget);
+}
+
+void AEnemy::MoveToTarget(AActor* Target)
+{
+    if (EnemyController == nullptr || Target == nullptr) return;
+    FAIMoveRequest MoveRequest;
+    MoveRequest.SetGoalActor(Target);
+    MoveRequest.SetAcceptanceRadius(15.f);
+    EnemyController->MoveTo(MoveRequest);
 }
 
 void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 {
-    
-
     const FVector Forward = GetActorForwardVector();
     // Lower Impact Point to the Enemy's Actor Location Z
     const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
@@ -163,56 +287,6 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
         );
     }
 }
-
-//void AEnemy::GetHit(const FVector& ImpactPoint)
-//{
-//    const FVector ImpactLocal = GetActorTransform().InverseTransformPosition(ImpactPoint);
-//
-//    // Usuwamy wartoœci ujemne - interesuje nas tylko wielkoœæ wzglêdna
-//    const float AbsX = FMath::Abs(ImpactLocal.X);
-//    const float AbsY = FMath::Abs(ImpactLocal.Y);
-//
-//    FString DirectionStr;
-//    FName MontageDirection;
-//
-//    // Okreœlanie dominuj¹cego kierunku
-//    if (AbsY >= AbsX) // Dominuje Y (przód/ty³)
-//    {
-//        if (ImpactLocal.Y > 0)
-//        {
-//            DirectionStr = "PRZODU";
-//            MontageDirection = "FromFront";
-//        }
-//        else
-//        {
-//            DirectionStr = "TY£U";
-//            MontageDirection = "FromBack";
-//        }
-//    }
-//    else // Dominuje X (lewo/prawo)
-//    {
-//        if (ImpactLocal.X > 0)
-//        {
-//            DirectionStr = "PRAWEJ";
-//            MontageDirection = "FromRight";
-//        }
-//        else
-//        {
-//            DirectionStr = "LEWEJ";
-//            MontageDirection = "FromLeft";
-//        }
-//    }
-//
-//    // Logi z dodatkowymi informacjami
-//    UE_LOG(LogTemp, Warning, TEXT("======================"));
-//    UE_LOG(LogTemp, Warning, TEXT("Kierunek: %s"), *DirectionStr);
-//    UE_LOG(LogTemp, Warning, TEXT("Wspó³rzêdne: X=%.1f | Y=%.1f"), ImpactLocal.X, ImpactLocal.Y);
-//    UE_LOG(LogTemp, Warning, TEXT("Stosunek X/Y: %.2f"), AbsX / AbsY);
-//    UE_LOG(LogTemp, Warning, TEXT("======================"));
-//
-//    PlayHitReactMontage(MontageDirection);
-//}
-
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

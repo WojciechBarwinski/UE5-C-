@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseCharacter.h"
 #include "CharacterTypes.h"
 #include "SlashCharacter.generated.h"
 
@@ -14,10 +14,10 @@ class UCharacterAttackHandler;
 class USpringArmComponent;
 class UCameraComponent;
 class UGroomComponent;
-class AWeapon;
+
 
 UCLASS()
-class SLASH_API ASlashCharacter : public ACharacter
+class SLASH_API ASlashCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -25,10 +25,9 @@ public:
 	ASlashCharacter();
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
-
+	virtual void Attack() override;
+	virtual bool CanAttack() override;
+	virtual void AttackEnd() override;
 protected:
 
 	virtual void BeginPlay() override;
@@ -83,8 +82,7 @@ private:
 	ECharacterArmedState CharacterArmedState = ECharacterArmedState::Unarmed;
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
 
-	UPROPERTY()
-	AWeapon* EquippedWeapon;
+	
 
 public:
 	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }

@@ -83,7 +83,4 @@ void UCharacterInteractionHandler::PlayDrawOrSheathedWeaponMontage(const FName S
 	}
 }
 
-//void UCharacterInteractionHandler::Open()
-//{
-//}
 

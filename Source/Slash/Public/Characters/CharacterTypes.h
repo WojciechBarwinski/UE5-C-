@@ -22,3 +22,11 @@ enum class ECharacterArmedState : uint8
     WeaponDrawn     UMETA(DisplayName = "Weapon Drawn"),
     WeaponSheathed  UMETA(DisplayName = "Weapon Sheathed")
 };
+
+UENUM(BlueprintType)
+enum class EEnemyState : uint8
+{
+    EES_Patrolling UMETA(DisplayName = "Patrolling"),
+    EES_Chasing UMETA(DisplayName = "Chasing"),
+    EES_Attacking UMETA(DisplayName = "Attacking")
+};

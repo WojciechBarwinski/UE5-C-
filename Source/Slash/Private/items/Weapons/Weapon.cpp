@@ -38,7 +38,8 @@ void AWeapon::BeginPlay()
 void AWeapon::Attach_Implementation(USceneComponent* InParent)
 {
 
-    ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(InParent->GetOwner());
+    //ASlashCharacter* SlashCharacter = Cast<ASlashCharacter>(InParent->GetOwner());
+    ACharacter* Character = Cast<ACharacter>(InParent->GetOwner());
     
     if (InParent && ItemMesh)
     {
@@ -48,8 +49,8 @@ void AWeapon::Attach_Implementation(USceneComponent* InParent)
         ItemState = EItemState::EIS_Equipped;
         PlayEquipSound();
         Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        SetOwner(SlashCharacter);
-        SetInstigator(SlashCharacter);
+        SetOwner(Character);
+        SetInstigator(Character);
         if (EmbersEffect)
         {
             EmbersEffect->Deactivate();

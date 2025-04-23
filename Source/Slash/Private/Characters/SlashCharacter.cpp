@@ -10,8 +10,8 @@
 #include "Characters/Handlers/CharacterInteractionHandler.h"
 #include "Characters/Handlers/CharacterMovementHandler.h"
 #include "Characters/Handlers/CharacterAttackHandler.h"
-#include "items/Weapons/Weapon.h"
-#include "Components/BoxComponent.h"
+//#include "items/Weapons/Weapon.h"
+//#include "Components/BoxComponent.h"
 
 
 ASlashCharacter::ASlashCharacter()
@@ -46,6 +46,8 @@ void ASlashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Tags.Add(FName("SlashCharacter"));
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 
 		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) {
@@ -54,14 +56,10 @@ void ASlashCharacter::BeginPlay()
 	}
 }
 
-void ASlashCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
-{
-	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
-	{
-		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
-		EquippedWeapon->ClearIgnoredActors();
-	}
-}
+//void ASlashCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+//{
+//	
+//}
 
 void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -80,6 +78,25 @@ void ASlashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Started, MovementHandler, &UCharacterMovementHandler::OnRightMouseButtonPressed);
 		EnhancedInputComponent->BindAction(RightMouseButtonAction, ETriggerEvent::Completed, MovementHandler, &UCharacterMovementHandler::OnRightMouseButtonReleased);
 	}
+}
+
+//do sprawdzenia
+void ASlashCharacter::Attack()
+{
+	if (AttackHandler)
+	{
+		AttackHandler->Attack(FInputActionValue());
+	}
+}
+
+//do sprawdzenia
+bool ASlashCharacter::CanAttack()
+{
+	return false;
+}
+
+void ASlashCharacter::AttackEnd()
+{
 }
 
 
