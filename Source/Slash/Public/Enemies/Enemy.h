@@ -44,7 +44,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	AActor* CurrentTarget = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
 	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+
+	virtual void Attack() override;
+	virtual void PlayAttackMontage() override;
 protected:
 
 	UFUNCTION()
